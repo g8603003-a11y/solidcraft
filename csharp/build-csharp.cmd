@@ -28,7 +28,7 @@ echo [step2] BUILD OK %time% >> "%LOG%"
 
 echo [3/3] 執行範例（SolidCraft 必須正在執行）...
 echo [step3] sample start >> "%LOG%"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "& '%DOTNET%' '%HERE%SolidCraft.Sample\bin\Release\net8.0\SolidCraft.Sample.dll' 2>&1 | Tee-Object -FilePath '%LOG%' -Append; exit $LASTEXITCODE"
+"%DOTNET%" "%HERE%SolidCraft.Sample\bin\Release\net8.0\SolidCraft.Sample.dll"
 if errorlevel 1 goto :fail_sample
 echo [step3] SAMPLE OK >> "%LOG%"
 echo 完成。組件在 csharp\SolidCraft.Net\bin\Release\net8.0\SolidCraft.Net.dll

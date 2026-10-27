@@ -17,8 +17,8 @@ public sealed class SketchCommands
     /// (<c>new { origin = …, x_dir = …, y_dir = … }</c>, or <c>new { face = new[]{x,y,z} }</c> for a body face).
     /// </summary>
     /// <param name="offset">Moves the plane along its normal; follows parameters when an expression.</param>
-    public Task<JsonElement> CreateAsync(object plane = "XY", Expr? offset = null, string? name = null, CancellationToken ct = default) =>
-        _c.ExecuteAsync(Commands.Sketch.Create, Json.Params(("plane", plane), ("offset", offset), ("name", name)), ct);
+    public Task<JsonElement> CreateAsync(object? plane = null, Expr? offset = null, string? name = null, CancellationToken ct = default) =>
+        _c.ExecuteAsync(Commands.Sketch.Create, Json.Params(("plane", plane ?? "XY"), ("offset", offset), ("name", name)), ct);
 
     /// <summary>Reopen a finished sketch for editing.</summary>
     public Task<JsonElement> EditAsync(string sketch, CancellationToken ct = default) =>

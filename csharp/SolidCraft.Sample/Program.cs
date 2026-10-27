@@ -35,7 +35,7 @@ var build = new List<CommandCall>
         dimensions = new { width = "L", height = "W" },
     }),
     new(Commands.Sketch.Finish),
-    new(Commands.Solid.Extrude, new { distance = "T", name = "Plate" }),
+    new(Commands.Solid.Extrude, new { distance = "T", name = "Plate", body_name = "Plate" }),
     new(Commands.Solid.Fillet, new
     {
         edges = new[] { new[] { 40.0, 25.0, 3.0 }, new[] { -40.0, 25.0, 3.0 }, new[] { 40.0, -25.0, 3.0 }, new[] { -40.0, -25.0, 3.0 } },
@@ -79,6 +79,8 @@ await app.Design.SetPropertiesAsync(new Dictionary<string, object?>
     ["com.acme.erp"] = new { item_id = 88123, material_code = "AL6061" },
 });
 await app.Solid.AssignMaterialAsync(new[] { "Plate" }, "Aluminum");
+var plate = (await app.Inspect.MeasureAsync(new[] { "Plate" }))[0];
+Console.WriteLine($"指定鋁材後：質量 {plate.MassG:F2} g（密度 {plate.DensityGCm3} g/cm³）");
 var props = await app.Design.PropertiesAsync();
 Console.WriteLine($"零件號碼 {props.GetValueOrDefault("part_number")}，版次 {props.GetValueOrDefault("revision")}");
 foreach (var row in await app.Inspect.BomAsync())
