@@ -487,7 +487,7 @@ public partial class MainWindow : Window
         var dlg = new OpenFileDialog { Filter = "SolidCraft 設計與可匯入檔案|*.solidcraft;*.step;*.stp;*.igs;*.iges;*.3mf;*.stl;*.obj;*.glb;*.gltf;*.dxf;*.svg|所有檔案|*.*" };
         if (dlg.ShowDialog(this) == true)
         {
-            await Run(async () => { await Client.Files.OpenAsync(dlg.FileName); await RefreshParametersAsync(); }, "開啟 " + Path.GetFileName(dlg.FileName));
+            await Run(async () => { await Client.Files.OpenAsync(dlg.FileName); await RefreshParametersAsync(); }, "開啟 " + System.IO.Path.GetFileName(dlg.FileName));
         }
     }
 
@@ -509,7 +509,7 @@ public partial class MainWindow : Window
         var dlg = new SaveFileDialog { Filter = "SolidCraft 設計|*.solidcraft", DefaultExt = ".solidcraft" };
         if (dlg.ShowDialog(this) == true)
         {
-            await Run(() => Client.Files.SaveAsAsync(dlg.FileName, overwrite: true), "另存 " + Path.GetFileName(dlg.FileName));
+            await Run(() => Client.Files.SaveAsAsync(dlg.FileName, overwrite: true), "另存 " + System.IO.Path.GetFileName(dlg.FileName));
         }
     }
 
@@ -536,7 +536,7 @@ public partial class MainWindow : Window
         var dlg = new OpenFileDialog { Filter = "STEP / IGES|*.step;*.stp;*.igs;*.iges|所有檔案|*.*" };
         if (dlg.ShowDialog(this) == true)
         {
-            await Run(() => Client.Files.InsertStepAsync(dlg.FileName), "插入 " + Path.GetFileName(dlg.FileName));
+            await Run(() => Client.Files.InsertStepAsync(dlg.FileName), "插入 " + System.IO.Path.GetFileName(dlg.FileName));
         }
     }
 
