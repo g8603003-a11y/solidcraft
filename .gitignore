@@ -18,3 +18,8 @@ mutants.out*/
 
 # zh-TW build log
 zh-TW/build.log
+
+# C# SDK build output
+csharp/**/bin/
+csharp/**/obj/
+csharp/build.log
