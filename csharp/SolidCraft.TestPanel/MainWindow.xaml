@@ -1,0 +1,264 @@
+<Window x:Class="SolidCraft.TestPanel.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SolidCraft.Net 測試面板" Height="760" Width="760" MinWidth="600" MinHeight="500"
+        FontSize="13" Loaded="Window_Loaded" Closing="Window_Closing">
+    <DockPanel Margin="10">
+
+        <!-- 連線列 -->
+        <Border DockPanel.Dock="Top" Background="#F2F4F7" Padding="8" Margin="0,0,0,8" CornerRadius="4">
+            <DockPanel>
+                <Button x:Name="ConnectButton" Content="連線" Click="Connect_Click" Margin="0,0,6,0"/>
+                <Button x:Name="DisconnectButton" Content="中斷" Click="Disconnect_Click" IsEnabled="False" Margin="0,0,12,0"/>
+                <TextBlock x:Name="StatusText" VerticalAlignment="Center" Text="尚未連線。請先啟動 SolidCraft。" TextTrimming="CharacterEllipsis"/>
+            </DockPanel>
+        </Border>
+
+        <!-- 底部訊息列 -->
+        <Border DockPanel.Dock="Bottom" Background="#F2F4F7" Padding="8,4" Margin="0,8,0,0" CornerRadius="4">
+            <TextBlock x:Name="MessageText" Text="就緒" TextWrapping="Wrap"/>
+        </Border>
+
+        <TabControl x:Name="Tabs" IsEnabled="False">
+
+            <!-- 參數 -->
+            <TabItem Header="參數">
+                <DockPanel Margin="8">
+                    <WrapPanel DockPanel.Dock="Top">
+                        <Button Content="重新整理" Click="RefreshParameters_Click"/>
+                        <Label Content="新增："/>
+                        <TextBox x:Name="NewParamName" Width="90" ToolTip="名稱"/>
+                        <TextBox x:Name="NewParamExpr" Width="120" ToolTip="運算式，例如 80 mm 或 L/2"/>
+                        <Button Content="新增參數" Click="AddParameter_Click"/>
+                        <Button Content="刪除選取" Click="DeleteParameter_Click"/>
+                    </WrapPanel>
+                    <TextBlock DockPanel.Dock="Top" Foreground="Gray" Margin="0,0,0,6" Text="直接在「運算式」欄位修改並按 Enter，模型會重建。"/>
+                    <DataGrid x:Name="ParamGrid" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                              CellEditEnding="ParamGrid_CellEditEnding" HeadersVisibility="Column" SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="名稱" Binding="{Binding Name}" IsReadOnly="True" Width="140"/>
+                            <DataGridTextColumn Header="運算式" Binding="{Binding Expression}" Width="180"/>
+                            <DataGridTextColumn Header="值" Binding="{Binding Value}" IsReadOnly="True" Width="90"/>
+                            <DataGridTextColumn Header="單位" Binding="{Binding Unit}" IsReadOnly="True" Width="60"/>
+                            <DataGridTextColumn Header="來源" Binding="{Binding Source}" IsReadOnly="True" Width="80"/>
+                            <DataGridTextColumn Header="錯誤" Binding="{Binding Error}" IsReadOnly="True" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+            <!-- 建模 -->
+            <TabItem Header="建模">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="8">
+                        <GroupBox Header="範例">
+                            <WrapPanel>
+                                <Button Content="新設計" Click="NewDesign_Click"/>
+                                <Button Content="建立範例板件（參數化、4 柱孔）" Click="BuildSample_Click"/>
+                                <Button Content="復原" Click="Undo_Click"/>
+                                <Button Content="取消復原" Click="Redo_Click"/>
+                            </WrapPanel>
+                        </GroupBox>
+                        <GroupBox Header="方塊（solid.box）">
+                            <WrapPanel>
+                                <Label Content="長"/><TextBox x:Name="BoxL" Width="70" Text="60"/>
+                                <Label Content="寬"/><TextBox x:Name="BoxW" Width="70" Text="40"/>
+                                <Label Content="高"/><TextBox x:Name="BoxH" Width="70" Text="20"/>
+                                <Label Content="運算"/>
+                                <ComboBox x:Name="BoxOp" Width="90" SelectedIndex="0">
+                                    <ComboBoxItem Content="new"/><ComboBoxItem Content="join"/><ComboBoxItem Content="cut"/><ComboBoxItem Content="intersect"/>
+                                </ComboBox>
+                                <Label Content="名稱"/><TextBox x:Name="BoxName" Width="90" Text="Block"/>
+                                <Button Content="建立方塊" Click="Box_Click"/>
+                            </WrapPanel>
+                        </GroupBox>
+                        <GroupBox Header="圓柱（solid.cylinder）">
+                            <WrapPanel>
+                                <Label Content="半徑"/><TextBox x:Name="CylR" Width="70" Text="8"/>
+                                <Label Content="高"/><TextBox x:Name="CylH" Width="70" Text="30"/>
+                                <Label Content="底面中心 x,y,z"/><TextBox x:Name="CylBase" Width="110" Text="0,0,0"/>
+                                <Label Content="運算"/>
+                                <ComboBox x:Name="CylOp" Width="90" SelectedIndex="2">
+                                    <ComboBoxItem Content="new"/><ComboBoxItem Content="join"/><ComboBoxItem Content="cut"/><ComboBoxItem Content="intersect"/>
+                                </ComboBox>
+                                <Label Content="名稱"/><TextBox x:Name="CylName" Width="90" Text="Bore"/>
+                                <Button Content="建立圓柱" Click="Cylinder_Click"/>
+                            </WrapPanel>
+                        </GroupBox>
+                        <GroupBox Header="草圖 + 伸長（sketch.* → solid.extrude）">
+                            <WrapPanel>
+                                <Label Content="基準面"/>
+                                <ComboBox x:Name="SketchPlane" Width="70" SelectedIndex="0">
+                                    <ComboBoxItem Content="XY"/><ComboBoxItem Content="XZ"/><ComboBoxItem Content="YZ"/>
+                                </ComboBox>
+                                <Label Content="偏移"/><TextBox x:Name="SketchOffset" Width="60" Text="0"/>
+                                <Label Content="圓直徑"/><TextBox x:Name="CircleD" Width="60" Text="10"/>
+                                <Label Content="圓心 x,y"/><TextBox x:Name="CircleC" Width="80" Text="0,0"/>
+                                <Label Content="伸長"/><TextBox x:Name="ExtrudeD" Width="60" Text="15"/>
+                                <ComboBox x:Name="ExtrudeOp" Width="90" SelectedIndex="1">
+                                    <ComboBoxItem Content="new"/><ComboBoxItem Content="join"/><ComboBoxItem Content="cut"/><ComboBoxItem Content="auto"/>
+                                </ComboBox>
+                                <Button Content="畫圓並伸長" Click="CircleExtrude_Click"/>
+                            </WrapPanel>
+                        </GroupBox>
+                        <GroupBox Header="圓角（solid.fillet，選最靠近該點的邊線）">
+                            <WrapPanel>
+                                <Label Content="邊線上一點 x,y,z"/><TextBox x:Name="FilletPt" Width="110" Text="30,20,10"/>
+                                <Label Content="半徑"/><TextBox x:Name="FilletR" Width="60" Text="3"/>
+                                <Button Content="圓角" Click="Fillet_Click"/>
+                            </WrapPanel>
+                        </GroupBox>
+                        <GroupBox Header="視角">
+                            <WrapPanel>
+                                <Button Content="等角視" Click="ViewIso_Click"/>
+                                <Button Content="前視" Click="ViewFront_Click"/>
+                                <Button Content="上視" Click="ViewTop_Click"/>
+                                <Button Content="全圖顯示" Click="ViewFit_Click"/>
+                                <Button Content="主視角" Click="ViewHome_Click"/>
+                            </WrapPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- 量測 -->
+            <TabItem Header="量測 / 材料">
+                <DockPanel Margin="8">
+                    <WrapPanel DockPanel.Dock="Top">
+                        <Button Content="量測全部本體" Click="Measure_Click"/>
+                        <Label Content="材料"/>
+                        <ComboBox x:Name="MaterialBox" Width="160" IsEditable="True"/>
+                        <Button Content="指定給選取本體" Click="AssignMaterial_Click"/>
+                        <Button Content="干涉檢查" Click="Interference_Click"/>
+                    </WrapPanel>
+                    <TextBlock DockPanel.Dock="Bottom" x:Name="MeasureTotal" Foreground="Gray" Margin="0,6,0,0"/>
+                    <DataGrid x:Name="BodyGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" SelectionMode="Extended">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="本體" Binding="{Binding Name}" Width="120"/>
+                            <DataGridTextColumn Header="體積 mm³" Binding="{Binding VolumeMm3, StringFormat={}{0:N1}}" Width="110"/>
+                            <DataGridTextColumn Header="表面積 mm²" Binding="{Binding AreaMm2, StringFormat={}{0:N1}}" Width="110"/>
+                            <DataGridTextColumn Header="質量 g" Binding="{Binding MassG, StringFormat={}{0:N2}}" Width="90"/>
+                            <DataGridTextColumn Header="材料" Binding="{Binding Material}" Width="110"/>
+                            <DataGridTextColumn Header="面" Binding="{Binding Faces}" Width="50"/>
+                            <DataGridTextColumn Header="邊線" Binding="{Binding Edges}" Width="50"/>
+                            <DataGridTextColumn Header="錯誤" Binding="{Binding Error}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+            <!-- 設計屬性 -->
+            <TabItem Header="設計屬性">
+                <StackPanel Margin="8">
+                    <TextBlock Foreground="Gray" Margin="0,0,0,8" Text="存在 .solidcraft 檔案裡的設計屬性，可用來和 ERP / PDM 對應。"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Content="零件號碼"/><TextBox Grid.Row="0" Grid.Column="1" x:Name="PropPartNumber"/>
+                        <Label Grid.Row="1" Content="版次"/><TextBox Grid.Row="1" Grid.Column="1" x:Name="PropRevision"/>
+                        <Label Grid.Row="2" Content="說明"/><TextBox Grid.Row="2" Grid.Column="1" x:Name="PropDescription"/>
+                        <Label Grid.Row="3" Content="專案"/><TextBox Grid.Row="3" Grid.Column="1" x:Name="PropProject"/>
+                        <Label Grid.Row="4" Content="作者"/><TextBox Grid.Row="4" Grid.Column="1" x:Name="PropAuthor"/>
+                        <Label Grid.Row="5" Content="組織"/><TextBox Grid.Row="5" Grid.Column="1" x:Name="PropOrganization"/>
+                    </Grid>
+                    <WrapPanel>
+                        <Button Content="讀取" Click="LoadProps_Click"/>
+                        <Button Content="寫入設計" Click="SaveProps_Click"/>
+                    </WrapPanel>
+                    <GroupBox Header="BOM（assembly.bom）">
+                        <DockPanel>
+                            <Button DockPanel.Dock="Top" Content="讀取 BOM" Click="Bom_Click" HorizontalAlignment="Left"/>
+                            <DataGrid x:Name="BomGrid" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" Height="180" Margin="0,0,6,6">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="項目" Binding="{Binding ItemText}" Width="50"/>
+                                    <DataGridTextColumn Header="零件號碼" Binding="{Binding PartNumber}" Width="120"/>
+                                    <DataGridTextColumn Header="說明" Binding="{Binding Description}" Width="*"/>
+                                    <DataGridTextColumn Header="版次" Binding="{Binding Revision}" Width="60"/>
+                                    <DataGridTextColumn Header="數量" Binding="{Binding Count}" Width="60"/>
+                                    <DataGridTextColumn Header="定義" Binding="{Binding Definition}" Width="120"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </GroupBox>
+                </StackPanel>
+            </TabItem>
+
+            <!-- 檔案 -->
+            <TabItem Header="檔案">
+                <StackPanel Margin="8">
+                    <GroupBox Header="設計檔">
+                        <WrapPanel>
+                            <Button Content="開啟…" Click="OpenFile_Click"/>
+                            <Button Content="儲存" Click="Save_Click"/>
+                            <Button Content="另存新檔…" Click="SaveAs_Click"/>
+                        </WrapPanel>
+                    </GroupBox>
+                    <GroupBox Header="匯出">
+                        <WrapPanel>
+                            <Button Content="匯出 STEP…" Click="ExportStep_Click"/>
+                            <Button Content="匯出 STL…" Click="ExportStl_Click"/>
+                            <Button Content="匯出 3MF…" Click="Export3mf_Click"/>
+                            <Button Content="插入 STEP…" Click="InsertStep_Click"/>
+                        </WrapPanel>
+                    </GroupBox>
+                    <GroupBox Header="影像">
+                        <WrapPanel>
+                            <Label Content="寬"/><TextBox x:Name="RenderW" Width="60" Text="1280"/>
+                            <Label Content="高"/><TextBox x:Name="RenderH" Width="60" Text="800"/>
+                            <Button Content="彩現 PNG…" Click="Render_Click"/>
+                            <Button Content="視窗截圖…" Click="Screenshot_Click"/>
+                        </WrapPanel>
+                    </GroupBox>
+                    <TextBlock x:Name="FileResult" Foreground="Gray" TextWrapping="Wrap"/>
+                </StackPanel>
+            </TabItem>
+
+            <!-- 指令 -->
+            <TabItem Header="指令">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="260"/><ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <DockPanel Grid.Column="0" Margin="0,0,8,0">
+                        <TextBox DockPanel.Dock="Top" x:Name="CommandFilter" TextChanged="CommandFilter_TextChanged" ToolTip="篩選指令"/>
+                        <ListBox x:Name="CommandList" SelectionChanged="CommandList_SelectionChanged" DisplayMemberPath="Display"/>
+                    </DockPanel>
+                    <DockPanel Grid.Column="1">
+                        <TextBox DockPanel.Dock="Top" x:Name="CommandId" ToolTip="指令 id，或 ui.* 控制方法" FontFamily="Consolas"/>
+                        <TextBlock DockPanel.Dock="Top" x:Name="CommandDoc" Foreground="Gray" TextWrapping="Wrap" MaxHeight="110" Margin="0,0,0,6"/>
+                        <WrapPanel DockPanel.Dock="Top">
+                            <Button Content="執行" Click="Execute_Click"/>
+                            <Button Content="document.inspect" Click="InspectDoc_Click"/>
+                            <Button Content="ui.inspect" Click="InspectUi_Click"/>
+                        </WrapPanel>
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="110"/><RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBox Grid.Row="0" x:Name="CommandParams" AcceptsReturn="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto"
+                                     Text="{}{&#10;}" ToolTip="參數 JSON"/>
+                            <TextBox Grid.Row="1" x:Name="CommandResult" IsReadOnly="True" AcceptsReturn="True" FontFamily="Consolas"
+                                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Margin="0,6,6,0"/>
+                        </Grid>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- 事件 -->
+            <TabItem Header="事件">
+                <DockPanel Margin="8">
+                    <WrapPanel DockPanel.Dock="Top">
+                        <Button Content="清除" Click="ClearLog_Click"/>
+                        <TextBlock VerticalAlignment="Center" Foreground="Gray" Text="App 每次設計變更會主動送 design.changed（連線時已訂閱）。"/>
+                    </WrapPanel>
+                    <ListBox x:Name="EventLog" FontFamily="Consolas"/>
+                </DockPanel>
+            </TabItem>
+
+        </TabControl>
+    </DockPanel>
+</Window>

@@ -23,3 +23,4 @@ zh-TW/build.log
 csharp/**/bin/
 csharp/**/obj/
 csharp/build.log
+csharp/testpanel.log
