@@ -78,7 +78,9 @@ pub const MODIFIERS: &[ToolModifiers] = &[
 ];
 
 pub(crate) const OPS: [&str; 4] = ["new", "join", "cut", "intersect"];
-pub(crate) const OP_LABELS: [&str; 4] = ["New Body", "Join", "Cut", "Intersect"];
+/// Labels (or message ids) of the operations. "Cut" here removes material, which is not the clipboard
+/// Cut (`ui.cut`), so it has its own id and each language can translate the two apart.
+pub(crate) const OP_LABELS: [&str; 4] = ["New Body", "Join", "ui.operation_cut", "Intersect"];
 const DIRS: [&str; 5] = ["positive", "negative", "symmetric", "positive", "negative"];
 /// The "Two sides" direction (a second distance the other way).
 pub const TWO_SIDES: usize = 3;
